@@ -4,11 +4,16 @@ import './App.css'
 import {create} from "zustand/react";
 import {persist, type StorageValue} from "zustand/middleware";
 
-interface MyStore {
+interface MyStoreValues {
     count: number;
     anotherCount: number;
+}
+
+interface MyStoreActions {
     increment: () => void;
 }
+
+type MyStore = MyStoreValues & MyStoreActions;
 
 const useMyStore = create<MyStore>()(
     persist(
@@ -29,11 +34,12 @@ const useMyStore = create<MyStore>()(
             storage: ({
                 getItem: (): StorageValue<MyStore> => {
                     const searchParams = new URLSearchParams(location.hash.slice(1))
+                    const newState: MyStoreValues = {
+                        count: parseInt(searchParams.get("count") || "0", 10),
+                        anotherCount: parseInt(searchParams.get("anotherCount") || "0", 10),
+                    }
                     return {
-                        state: {
-                            count: parseInt(searchParams.get("count") || "0", 10),
-                            anotherCount: parseInt(searchParams.get("anotherCount") || "0", 10)
-                        } as MyStore,
+                        state: newState as MyStore
                     }
                 },
                 setItem: (_, newValue): void => {
